@@ -31,47 +31,37 @@ int estChaineDecimaleValide(const char *s) {
 // Saisit un BigBinary avec réessai infini en cas d'erreur
 BigBinary saisirBigBinaryAvecRetry() {
     char buffer[256];
-
     while (1) {  // Boucle infinie jusqu'à ce qu'une entrée valide soit fournie
         printf("> ");
-
         if (scanf("%255s", buffer) != 1) {
             // Erreur de lecture
             printf("Erreur de lecture. Veuillez réessayer.\n");
-
             // Vider le buffer d'entrée
             int c;
             while ((c = getchar()) != '\n' && c != EOF);
             continue;
         }
-
         // Vérifier si c'est une chaîne binaire valide
         if (estChaineBinaireValide(buffer)) {
             printf("Interprete comme binaire: %s\n", buffer);
             return creerBigBinaryDepuisChaine(buffer);
         }
-
         // Vérifier si c'est une chaîne décimale valide
         if (estChaineDecimaleValide(buffer)) {
             int valeur = atoi(buffer);
             printf("Interprete comme decimal: %d\n", valeur);
             return creerBigBinaryDepuisEntier(valeur);
         }
-
         // Si on arrive ici, l'entrée est invalide
         printf(" Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
-
         // Vider le buffer d'entrée
         int c;
         while ((c = getchar()) != '\n' && c != EOF);
     }
 }
 
-// Le reste du code bigbinary.c reste identique...
-// [Toutes les autres fonctions restent les mêmes]
-
 // Initialise un BigBinary avec une taille donnée
-// Tous les bits sont initialisés a 0
+// Tous les bits sont initialisés à0
 BigBinary initBigBinary(int taille, int signe) {
     BigBinary nb;
     nb.Taille = taille;         // On stocke la taille
@@ -91,7 +81,6 @@ BigBinary creerBigBinaryDepuisChaine(const char *s) {
     for (int i = 0; i < len; i++) {
         nb.Tdigits[i] = (s[i] == '1') ? 1 : 0;
     }
-
     // On supprime les éventuels zéros inutiles au début
     normaliseBigBinary(&nb);
     return nb;
@@ -101,16 +90,13 @@ BigBinary creerBigBinaryDepuisChaine(const char *s) {
 // Exemple : 13 -> "1101"
 BigBinary creerBigBinaryDepuisEntier(int n) {
     if (n == 0) return creerBigBinaryDepuisChaine("0");
-
     // Calcul du nombre de bits nécessaires
     int nbBits = 0, temp = n;
     while (temp > 0) {
         nbBits++;
         temp /= 2;
     }
-
     BigBinary nb = initBigBinary(nbBits, +1);
-
     // Remplissage du tableau de droite à gauche (LSB à la fin)
     int i = nbBits - 1;
     while (n > 0) {
@@ -118,7 +104,6 @@ BigBinary creerBigBinaryDepuisEntier(int n) {
         n /= 2;                 // on divise par 2 pour passer au bit suivant
         i--;
     }
-
     return nb;
 }
 
@@ -130,7 +115,6 @@ void normaliseBigBinary(BigBinary *nb) {
     while (i < nb->Taille - 1 && nb->Tdigits[i] == 0) {
         i++;
     }
-
     // Si on a trouvé des zéros à enlever
     if (i > 0) {
         int newSize = nb->Taille - i;         // Nouvelle taille sans les zéros
@@ -169,7 +153,6 @@ void libereBigBinary(BigBinary *nb) {
     nb->Taille = 0;
     nb->Signe = +1;
 }
-
 // Compare si deux BigBinary sont égaux
 int egalBigBinary(const BigBinary *A, const BigBinary *B) {
     if (A->Taille != B->Taille) return 0;     // Différentes tailles -> faux
