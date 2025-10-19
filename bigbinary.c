@@ -4,6 +4,50 @@
 #include <ctype.h>
 #include "bigbinary.h"
 
+// Initialise un BigBinary avec une taille donnée
+// Tous les bits sont initialisés à 0
+BigBinary initBigBinary(int taille, int signe) {
+    BigBinary nb;
+    nb.Taille = taille;         // On stocke la taille
+    nb.Signe = signe;           // Pour l'instant, toujours +1 (positif)
+    nb.Tdigits = (int *)calloc(taille, sizeof(int)); // On réserve un tableau rempli de 0
+    return nb;
+}
+
+// Saisit un BigBinary avec réessai infini en cas d'erreur
+BigBinary saisirBigBinaryAvecRetry() {
+    char buffer[256];
+    while (1) {  // Boucle infinie jusqu'à ce qu'une entrée valide soit fournie
+        printf("> ");
+        if (scanf("%255s", buffer) != 1) {
+            // Erreur de lecture
+            printf("Erreur de lecture. Veuillez réessayer.");
+            // Vider le buffer d'entrée
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            continue;
+        }
+        // Vérifier si c'est une chaîne binaire valide
+        if (estChaineBinaireValide(buffer)) {
+            printf("Interprete comme binaire: %s\n", buffer);
+            printf("\n");
+            return creerBigBinaryDepuisChaine(buffer);
+        }
+        // Vérifier si c'est une chaîne décimale valide
+        if (estChaineDecimaleValide(buffer)) {
+            int valeur = atoi(buffer);
+            printf("Interprete comme decimal: %d\n", valeur);
+            printf("\n");
+            return creerBigBinaryDepuisEntier(valeur);
+        }
+        // Si on arrive ici, l'entrée est invalide
+        printf(" Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
+        // Vider le buffer d'entrée
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+    }
+}
+
 // Vérifie si une chaîne est valide (contient seulement '0' et '1')
 int estChaineBinaireValide(const char *s) {
     if (s == NULL || strlen(s) == 0) return 0;
@@ -26,48 +70,6 @@ int estChaineDecimaleValide(const char *s) {
         }
     }
     return 1;
-}
-
-// Saisit un BigBinary avec réessai infini en cas d'erreur
-BigBinary saisirBigBinaryAvecRetry() {
-    char buffer[256];
-    while (1) {  // Boucle infinie jusqu'à ce qu'une entrée valide soit fournie
-        printf("> ");
-        if (scanf("%255s", buffer) != 1) {
-            // Erreur de lecture
-            printf("Erreur de lecture. Veuillez réessayer.\n");
-            // Vider le buffer d'entrée
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF);
-            continue;
-        }
-        // Vérifier si c'est une chaîne binaire valide
-        if (estChaineBinaireValide(buffer)) {
-            printf("Interprete comme binaire: %s\n", buffer);
-            return creerBigBinaryDepuisChaine(buffer);
-        }
-        // Vérifier si c'est une chaîne décimale valide
-        if (estChaineDecimaleValide(buffer)) {
-            int valeur = atoi(buffer);
-            printf("Interprete comme decimal: %d\n", valeur);
-            return creerBigBinaryDepuisEntier(valeur);
-        }
-        // Si on arrive ici, l'entrée est invalide
-        printf(" Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
-        // Vider le buffer d'entrée
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF);
-    }
-}
-
-// Initialise un BigBinary avec une taille donnée
-// Tous les bits sont initialisés à0
-BigBinary initBigBinary(int taille, int signe) {
-    BigBinary nb;
-    nb.Taille = taille;         // On stocke la taille
-    nb.Signe = signe;           // Pour l'instant, toujours +1 (positif)
-    nb.Tdigits = (int *)calloc(taille, sizeof(int)); // On réserve un tableau rempli de 0
-    return nb;
 }
 
 // Crée un BigBinary depuis une chaîne binaire
@@ -118,7 +120,7 @@ void normaliseBigBinary(BigBinary *nb) {
     // Si on a trouvé des zéros à enlever
     if (i > 0) {
         int newSize = nb->Taille - i;         // Nouvelle taille sans les zéros
-        int *newTab = (int *)malloc(newSize * sizeof(int));
+        int *newTab = (int *)malloc(newSize * sizeof(int)); // Alloue nouveau tableau
         for (int j = 0; j < newSize; j++) {
             newTab[j] = nb->Tdigits[j + i];   // On recopie sans les zéros
         }
@@ -153,6 +155,7 @@ void libereBigBinary(BigBinary *nb) {
     nb->Taille = 0;
     nb->Signe = +1;
 }
+
 // Compare si deux BigBinary sont égaux
 int egalBigBinary(const BigBinary *A, const BigBinary *B) {
     if (A->Taille != B->Taille) return 0;     // Différentes tailles -> faux
@@ -166,7 +169,6 @@ int egalBigBinary(const BigBinary *A, const BigBinary *B) {
 int inferieurBigBinary(const BigBinary *A, const BigBinary *B) {
     if (A->Taille < B->Taille) return 1;      // Moins de bits -> forcément plus petit
     if (A->Taille > B->Taille) return 0;      // Plus de bits -> forcément plus grand
-
     // Sinon, on compare bit par bit
     for (int i = 0; i < A->Taille; i++) {
         if (A->Tdigits[i] < B->Tdigits[i]) return 1;
@@ -175,7 +177,7 @@ int inferieurBigBinary(const BigBinary *A, const BigBinary *B) {
     return 0; // Exactement égaux
 }
 
-// Addition binaire A + B
+// Addition binaire A + B (A et B positifs)
 // On part du dernier bit (LSB) et on remonte vers la gauche
 // Exemple : 1011 (11) + 0101 (5) = 10000 (16)
 BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
@@ -202,9 +204,16 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
     return R;
 }
 
-// Soustraction binaire A - B (en supposant A >= B)
+// Soustraction binaire A - B (A et B positifs, A >= B)
 // Exemple : 10000 (16) - 0101 (5) = 1011 (11)
 BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
+    // Vérification que A >= B
+    if (inferieurBigBinary(A, B)) {
+        printf("Operation impossible : A < B\n");
+        // Retourne un BigBinary nul
+        return creerBigBinaryDepuisEntier(0);
+    }
+
     int lenA = A->Taille, lenB = B->Taille;
     BigBinary R = initBigBinary(lenA, +1);
 
@@ -223,14 +232,6 @@ BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
         }
         R.Tdigits[iR] = diff;
         iA--; iB--; iR--;
-    }
-
-    // Vérification que A >= B
-    if (borrow != 0) {
-        printf("Attention : Resultat negatif detecte (A < B)\n");
-        // On retourne 0 pour éviter les résultats incorrects
-        libereBigBinary(&R);
-        return creerBigBinaryDepuisEntier(0);
     }
 
     normaliseBigBinary(&R);

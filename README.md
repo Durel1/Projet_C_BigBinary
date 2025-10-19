@@ -16,9 +16,10 @@ Exponentiation modulaire rapide.
 Phase 3 (bonus) :
 Utiliser la bibliothèque pour un mini-chiffrement RSA pédagogique (pas sécurisé, mais pour comprendre le principe).
 
+
 Organisation des fichiers :
 bigbinary.h : le header (déclare la structure BigBinary et les fonctions publiques).
-bigbinary.c : l’implémentation (code des fonctions de manipulation).
+bigbinary.c : l’implémentation des fonctions de manipulation.
 main.c : le programme principal pour tester les fonctions.
 README.md : ce fichier, qui explique le projet et son avancement.
 

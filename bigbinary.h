@@ -7,7 +7,7 @@ typedef struct {
     // Convention : Tdigits[0] = MSB (bit de gauche)
     // Tdigits[Taille-1] = LSB (bit de droite)
     int Taille;     // Nombre de bits stockés
-    int Signe;      // +1 si positif (Phase 1 : on ne gère que les positifs)
+    int Signe;      // +1 si positif
 } BigBinary;
 
 // Crée un BigBinary vide de taille donnée (bits = 0)
@@ -29,20 +29,12 @@ void afficheBigBinary(const BigBinary nb);
 void libereBigBinary(BigBinary *nb);
 
 // Fonctions de comparaison
-
-// Retourne 1 si A == B, sinon 0
 int egalBigBinary(const BigBinary *A, const BigBinary *B);
-
-// Retourne 1 si A < B, sinon 0
 int inferieurBigBinary(const BigBinary *A, const BigBinary *B);
 
 // Opérations arithmétiques de base
-
-// Calcule A + B (retourne un nouveau BigBinary)
-BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B);
-
-// Calcule A - B (retourne un nouveau BigBinary, suppose A >= B)
-BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B);
+BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B);  // A et B positifs
+BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B);  // A et B positifs, A >= B
 
 // Fonctions utilitaires pour la saisie
 int estChaineBinaireValide(const char *s);
