@@ -4,8 +4,9 @@
 #include <ctype.h>
 #include "bigbinary.h"
 
-// Initialise un BigBinary avec une taille donnée
-// Tous les bits sont initialisés à 0
+// PHASE 1 - FONCTIONS DE BASE
+
+// Initialise un BigBinary avec une taille donnée, tous les bits sont initialisés à 0
 BigBinary initBigBinary(int taille, int signe) {
     BigBinary nb;
     nb.Taille = taille;         // On stocke la taille
@@ -29,19 +30,15 @@ BigBinary saisirBigBinaryAvecRetry() {
         }
         // Vérifier si c'est une chaîne binaire valide
         if (estChaineBinaireValide(buffer)) {
-            printf("Interprete comme binaire: %s\n", buffer);
-            printf("\n");
             return creerBigBinaryDepuisChaine(buffer);
         }
         // Vérifier si c'est une chaîne décimale valide
         if (estChaineDecimaleValide(buffer)) {
             int valeur = atoi(buffer);
-            printf("Interprete comme decimal: %d\n", valeur);
-            printf("\n");
             return creerBigBinaryDepuisEntier(valeur);
         }
         // Si on arrive ici, l'entrée est invalide
-        printf(" Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
+        printf("Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
         // Vider le buffer d'entrée
         int c;
         while ((c = getchar()) != '\n' && c != EOF);
@@ -73,7 +70,6 @@ int estChaineDecimaleValide(const char *s) {
 }
 
 // Crée un BigBinary depuis une chaîne binaire
-// Exemple : "1011" -> tableau [1,0,1,1]
 BigBinary creerBigBinaryDepuisChaine(const char *s) {
     int len = strlen(s);                      // Taille de la chaîne
     BigBinary nb = initBigBinary(len, +1);    // On réserve un BigBinary de cette taille
@@ -89,7 +85,6 @@ BigBinary creerBigBinaryDepuisChaine(const char *s) {
 }
 
 // Crée un BigBinary à partir d'un entier positif (int)
-// Exemple : 13 -> "1101"
 BigBinary creerBigBinaryDepuisEntier(int n) {
     if (n == 0) return creerBigBinaryDepuisChaine("0");
     // Calcul du nombre de bits nécessaires
@@ -110,7 +105,6 @@ BigBinary creerBigBinaryDepuisEntier(int n) {
 }
 
 // Supprime les zéros inutiles au début du tableau
-// Exemple : "000101" -> "101"
 void normaliseBigBinary(BigBinary *nb) {
     int i = 0;
     // On avance tant qu'il y a des 0 à gauche, sauf si on arrive au dernier bit
@@ -138,7 +132,6 @@ void normaliseBigBinary(BigBinary *nb) {
 }
 
 // Affiche un BigBinary
-// Exemple : tableau [1,0,1,1] -> affiche "1011"
 void afficheBigBinary(const BigBinary nb) {
     for (int i = 0; i < nb.Taille; i++) {
         printf("%d", nb.Tdigits[i]);
@@ -179,7 +172,6 @@ int inferieurBigBinary(const BigBinary *A, const BigBinary *B) {
 
 // Addition binaire A + B (A et B positifs)
 // On part du dernier bit (LSB) et on remonte vers la gauche
-// Exemple : 1011 (11) + 0101 (5) = 10000 (16)
 BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
     int lenA = A->Taille, lenB = B->Taille;
     int maxLen = (lenA > lenB) ? lenA : lenB;
@@ -205,7 +197,6 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
 }
 
 // Soustraction binaire A - B (A et B positifs, A >= B)
-// Exemple : 10000 (16) - 0101 (5) = 1011 (11)
 BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
     // Vérification que A >= B
     if (inferieurBigBinary(A, B)) {
@@ -236,4 +227,274 @@ BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
 
     normaliseBigBinary(&R);
     return R;
+}
+
+// Convertit un BigBinary en entier décimal
+unsigned long long bigBinaryVersDecimal(const BigBinary *nb) {
+    unsigned long long resultat = 0;
+    unsigned long long puissance = 1;
+
+    // On part de la fin (LSB) vers le début (MSB)
+    for (int i = nb->Taille - 1; i >= 0; i--) {
+        if (nb->Tdigits[i] == 1) {
+            resultat += puissance;
+        }
+        puissance *= 2;
+    }
+    return resultat;
+}
+
+
+// PHASE 2 - FONCTIONS AVANCÉES
+
+// Effectue un décalage à gauche (multiplication par 2)
+void decalageGauche(BigBinary *nb) {
+    if (nb->Taille == 1 && nb->Tdigits[0] == 0) {
+        return; // 0 décalé à gauche reste 0
+    }
+
+    int newSize = nb->Taille + 1;
+    int *newTab = (int *)malloc(newSize * sizeof(int));
+
+    // Recopie des bits existants
+    for (int i = 0; i < nb->Taille; i++) {
+        newTab[i] = nb->Tdigits[i];
+    }
+    // Ajoute un 0 à la fin (LSB)
+    newTab[newSize - 1] = 0;
+
+    free(nb->Tdigits);
+    nb->Tdigits = newTab;
+    nb->Taille = newSize;
+}
+
+// Effectue un décalage à droite (division entière par 2)
+void decalageDroite(BigBinary *nb) {
+    if (nb->Taille <= 1) {
+        // Si taille 1 ou 0, le résultat est 0
+        if (nb->Taille == 1) {
+            nb->Tdigits[0] = 0;
+        }
+        return;
+    }
+
+    int newSize = nb->Taille - 1;
+    int *newTab = (int *)malloc(newSize * sizeof(int));
+
+    // Recopie sans le dernier bit (LSB)
+    for (int i = 0; i < newSize; i++) {
+        newTab[i] = nb->Tdigits[i];
+    }
+
+    free(nb->Tdigits);
+    nb->Tdigits = newTab;
+    nb->Taille = newSize;
+
+    normaliseBigBinary(nb);
+}
+
+// Vérifie si un BigBinary est pair (LSB = 0)
+int estPair(const BigBinary *nb) {
+    if (nb->Taille == 0) return 1; // 0 est considéré comme pair
+    return (nb->Tdigits[nb->Taille - 1] == 0); // Vérifie le bit de poids faible
+}
+
+// Multiplication Égyptienne (algorithme de duplication)
+BigBinary multiplicationEgyptienne(const BigBinary *A, const BigBinary *B) {
+    BigBinary resultat = creerBigBinaryDepuisEntier(0); // Résultat initialisé à 0
+    BigBinary multiplicande;  // Copie de A (qu'on va décaler)
+    BigBinary multiplicateur; // Copie de B (qu'on va réduire)
+
+    // Créer des copies pour travailler
+    multiplicande.Taille = A->Taille;
+    multiplicande.Signe = A->Signe;
+    multiplicande.Tdigits = (int *)malloc(multiplicande.Taille * sizeof(int));
+    memcpy(multiplicande.Tdigits, A->Tdigits, multiplicande.Taille * sizeof(int));
+
+    multiplicateur.Taille = B->Taille;
+    multiplicateur.Signe = B->Signe;
+    multiplicateur.Tdigits = (int *)malloc(multiplicateur.Taille * sizeof(int));
+    memcpy(multiplicateur.Tdigits, B->Tdigits, multiplicateur.Taille * sizeof(int));
+
+    // Tant que le multiplicateur n'est pas nul
+    while (multiplicateur.Taille > 1 || multiplicateur.Tdigits[0] != 0) {
+        // Si le bit de poids faible du multiplicateur est 1, on ajoute le multiplicande
+        if (!estPair(&multiplicateur)) {
+            BigBinary temp = additionBigBinary(&resultat, &multiplicande);
+            libereBigBinary(&resultat);
+            resultat = temp;
+        }
+
+        // Décalage à gauche du multiplicande (×2)
+        decalageGauche(&multiplicande);
+
+        // Décalage à droite du multiplicateur (÷2)
+        decalageDroite(&multiplicateur);
+    }
+
+    // Libération mémoire des copies
+    libereBigBinary(&multiplicande);
+    libereBigBinary(&multiplicateur);
+
+    return resultat;
+}
+
+// Algorithme binaire d'Euclide pour calculer le PGCD
+BigBinary pgcdBigBinary(const BigBinary *A, const BigBinary *B) {
+    // Cas de base : si B = 0, PGCD = A
+    if (B->Taille == 1 && B->Tdigits[0] == 0) {
+        BigBinary resultat;
+        resultat.Taille = A->Taille;
+        resultat.Signe = A->Signe;
+        resultat.Tdigits = (int *)malloc(resultat.Taille * sizeof(int));
+        memcpy(resultat.Tdigits, A->Tdigits, resultat.Taille * sizeof(int));
+        return resultat;
+    }
+
+    // Cas de base : si A = 0, PGCD = B
+    if (A->Taille == 1 && A->Tdigits[0] == 0) {
+        BigBinary resultat;
+        resultat.Taille = B->Taille;
+        resultat.Signe = B->Signe;
+        resultat.Tdigits = (int *)malloc(resultat.Taille * sizeof(int));
+        memcpy(resultat.Tdigits, B->Tdigits, resultat.Taille * sizeof(int));
+        return resultat;
+    }
+
+    // Faire des copies pour travailler sans modifier les originaux
+    BigBinary a, b;
+    a.Taille = A->Taille;
+    a.Signe = A->Signe;
+    a.Tdigits = (int *)malloc(a.Taille * sizeof(int));
+    memcpy(a.Tdigits, A->Tdigits, a.Taille * sizeof(int));
+
+    b.Taille = B->Taille;
+    b.Signe = B->Signe;
+    b.Tdigits = (int *)malloc(b.Taille * sizeof(int));
+    memcpy(b.Tdigits, B->Tdigits, b.Taille * sizeof(int));
+
+    int facteur = 0;
+
+    // Éliminer les facteurs 2 communs
+    while (estPair(&a) && estPair(&b)) {
+        decalageDroite(&a);
+        decalageDroite(&b);
+        facteur++;
+    }
+
+    // Algorithme principal
+    while (a.Taille > 1 || a.Tdigits[0] != 0) {
+        // Éliminer les facteurs 2 de a
+        while (estPair(&a)) {
+            decalageDroite(&a);
+        }
+        // Éliminer les facteurs 2 de b
+        while (estPair(&b)) {
+            decalageDroite(&b);
+        }
+
+        // Soustraire le plus petit du plus grand
+        if (!inferieurBigBinary(&a, &b)) {
+            BigBinary temp = soustractionBigBinary(&a, &b);
+            libereBigBinary(&a);
+            a = temp;
+        } else {
+            BigBinary temp = soustractionBigBinary(&b, &a);
+            libereBigBinary(&b);
+            b = temp;
+        }
+    }
+
+    // Le PGCD est b multiplié par les facteurs 2 communs
+    BigBinary resultat = b;
+    for (int i = 0; i < facteur; i++) {
+        decalageGauche(&resultat);
+    }
+
+    libereBigBinary(&a);
+    return resultat;
+}
+
+// Utilisation de la méthode par soustractions successives
+BigBinary moduloBigBinary(const BigBinary *A, const BigBinary *B) {
+    // Cas particuliers
+    if (B->Taille == 1 && B->Tdigits[0] == 0) {
+        printf("Erreur : division par zero\n");
+        return creerBigBinaryDepuisEntier(0);
+    }
+
+    if (inferieurBigBinary(A, B)) {
+        // Si A < B, alors A mod B = A
+        BigBinary resultat;
+        resultat.Taille = A->Taille;
+        resultat.Signe = A->Signe;
+        resultat.Tdigits = (int *)malloc(resultat.Taille * sizeof(int));
+        memcpy(resultat.Tdigits, A->Tdigits, resultat.Taille * sizeof(int));
+        return resultat;
+    }
+
+    if (egalBigBinary(A, B)) {
+        // Si A = B, alors A mod B = 0
+        return creerBigBinaryDepuisEntier(0);
+    }
+
+    // Faire une copie de A pour travailler
+    BigBinary a;
+    a.Taille = A->Taille;
+    a.Signe = A->Signe;
+    a.Tdigits = (int *)malloc(a.Taille * sizeof(int));
+    memcpy(a.Tdigits, A->Tdigits, a.Taille * sizeof(int));
+
+    // Méthode simple : soustraire B jusqu'à ce que a < B
+    BigBinary b_copy;
+    b_copy.Taille = B->Taille;
+    b_copy.Signe = B->Signe;
+    b_copy.Tdigits = (int *)malloc(b_copy.Taille * sizeof(int));
+    memcpy(b_copy.Tdigits, B->Tdigits, b_copy.Taille * sizeof(int));
+
+    // Tant que a >= B, soustraire B
+    while (!inferieurBigBinary(&a, &b_copy)) {
+        BigBinary temp = soustractionBigBinary(&a, &b_copy);
+        libereBigBinary(&a);
+        a = temp;
+    }
+    libereBigBinary(&b_copy);
+    return a;
+}
+
+// Exponentiation modulaire rapide A^e mod N
+BigBinary expModBigBinary(const BigBinary *A, unsigned int e, const BigBinary *N) {
+    // Cas de base
+    if (e == 0) {
+        return creerBigBinaryDepuisEntier(1); // A^0 = 1
+    }
+
+    // Réduire A modulo N d'abord pour s'assurer que base < N
+    BigBinary base = moduloBigBinary(A, N);
+
+    BigBinary resultat = creerBigBinaryDepuisEntier(1);
+
+    // Algorithme d'exponentiation binaire
+    while (e > 0) {
+        // Si e est impair, multiplier le résultat par la base
+        if (e % 2 == 1) {
+            BigBinary temp = multiplicationEgyptienne(&resultat, &base);
+            BigBinary temp_mod = moduloBigBinary(&temp, N);
+            libereBigBinary(&resultat);
+            libereBigBinary(&temp);
+            resultat = temp_mod;
+        }
+        // Mettre la base au carré
+        if (e > 1) { // Éviter un calcul inutile à la dernière itération
+            BigBinary temp_carre = multiplicationEgyptienne(&base, &base);
+            BigBinary base_mod = moduloBigBinary(&temp_carre, N);
+            libereBigBinary(&base);
+            libereBigBinary(&temp_carre);
+            base = base_mod;
+        }
+        // Diviser e par 2
+        e /= 2;
+    }
+    libereBigBinary(&base);
+    return resultat;
 }
