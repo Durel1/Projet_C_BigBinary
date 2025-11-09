@@ -3,12 +3,14 @@
 
 // Définition de la structure BigBinary
 typedef struct {
-    int *Tdigits;   // Tableau dynamique contenant les bits
+    int *Tdigits;
     // Convention : Tdigits[0] = MSB (bit de gauche)
     // Tdigits[Taille-1] = LSB (bit de droite)
-    int Taille;     // Nombre de bits stockés
-    int Signe;      // +1 si positif
+    int Taille;
+    int Signe;
 } BigBinary;
+
+// === PHASE 1 - Fonctions de base ===
 
 // Crée un BigBinary vide de taille donnée (bits = 0)
 BigBinary initBigBinary(int taille, int signe);
@@ -40,5 +42,27 @@ BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B);  // A e
 int estChaineBinaireValide(const char *s);
 int estChaineDecimaleValide(const char *s);
 BigBinary saisirBigBinaryAvecRetry();
+
+// === PHASE 2 - Fonctions avancées ===
+
+// Fonctions utilitaires pour les opérations binaires
+void decalageGauche(BigBinary *nb);    // Multiplication par 2 (ajoute un 0 à droite)
+void decalageDroite(BigBinary *nb);    // Division par 2 (supprime le LSB)
+int estPair(const BigBinary *nb);      // Vérifie si le nombre est pair (LSB = 0)
+
+// Multiplication Égyptienne (algorithme de duplication)
+BigBinary multiplicationEgyptienne(const BigBinary *A, const BigBinary *B);
+
+// Algorithme binaire d'Euclide pour le PGCD
+BigBinary pgcdBigBinary(const BigBinary *A, const BigBinary *B);
+
+// Calcul du modulo sans division (méthode par soustraction de multiples)
+BigBinary moduloBigBinary(const BigBinary *A, const BigBinary *B);
+
+// Exponentiation modulaire rapide (exposant = unsigned int)
+BigBinary expModBigBinary(const BigBinary *A, unsigned int e, const BigBinary *N);
+
+// Fonction pour convertir BigBinary en entier décimal
+unsigned long long bigBinaryVersDecimal(const BigBinary *nb);
 
 #endif
