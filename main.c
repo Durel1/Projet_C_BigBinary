@@ -4,13 +4,12 @@
 
 int main() {
     printf("=== BIBLIOTHEQUE BIG BINARY === \n\n");
-
     printf("Entrez le premier nombre (A) :\n");
     BigBinary A = saisirBigBinaryAvecRetry();
     printf("Entrez le second nombre (B) :\n");
     BigBinary B = saisirBigBinaryAvecRetry();
 
-    printf("=== PHASE 1 - FUNCTIONS DE BASE===\n\n");
+    printf("=== PHASE 1 - FUNCTIONS DE BASE ===\n\n");
     printf("--- AFFICHAGE BINAIRE ---\n");
     printf("A = "); afficheBigBinary(A);
     printf("B = "); afficheBigBinary(B);
@@ -39,20 +38,16 @@ int main() {
     }
 
     printf("\n=== PHASE 2 - OPERATIONS AVANCEES ===\n");
-
-    // Multiplication Égyptienne
     printf("\n--- Multiplication Egyptienne ---\n");
     BigBinary M = multiplicationEgyptienne(&A, &B);
     printf("A * B = "); afficheBigBinary(M);
     libereBigBinary(&M);
 
-    // PGCD binaire
     printf("\n--- PGCD Binaire ---\n");
     BigBinary PGCD = pgcdBigBinary(&A, &B);
     printf("PGCD(A, B) = "); afficheBigBinary(PGCD);
     libereBigBinary(&PGCD);
 
-    // Modulo sans division
     printf("\n--- Modulo sans division ---\n");
     if (inferieurBigBinary(&B, &A) || egalBigBinary(&A, &B)) {
         BigBinary MOD = moduloBigBinary(&A, &B);
@@ -62,7 +57,6 @@ int main() {
         printf("A mod B : A < B, donc A mod B = A\n");
     }
 
-    // Exponentiation modulaire (test avec un petit exposant)
     printf("\n--- Exponentiation Modulaire ---\n");
     printf("Entrez un exposant e (entier decimal) : ");
     unsigned int e;
@@ -83,11 +77,9 @@ int main() {
     }
 
     libereBigBinary(&N);
-
     // Libération mémoire finale
     libereBigBinary(&A);
     libereBigBinary(&B);
 
-    printf("\n=== FIN DU PROGRAMME ===\n");
     return 0;
 }
