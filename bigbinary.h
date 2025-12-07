@@ -1,19 +1,16 @@
 #ifndef BIGBINARY_H
 #define BIGBINARY_H
 
-// Définition de la structure BigBinary
 typedef struct {
-    int *Tdigits;
-    // Convention : Tdigits[0] = MSB (bit de gauche)
-    // Tdigits[Taille-1] = LSB (bit de droite)
+    int *Tdigits;// Convention : Tdigits[0] = MSB (bit de gauche),  Tdigits[Taille-1] = LSB (bit de droite)
     int Taille;
     int Signe;
 } BigBinary;
 
-// === PHASE 1 - Fonctions de base ===
-
 // Crée un BigBinary vide de taille donnée (bits = 0)
 BigBinary initBigBinary(int taille, int signe);
+
+BigBinary copierBigBinary(const BigBinary *nb);
 
 // Crée un BigBinary à partir d'une chaîne binaire (ex: "1011")
 BigBinary creerBigBinaryDepuisChaine(const char *s);

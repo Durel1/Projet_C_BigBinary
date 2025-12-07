@@ -4,13 +4,11 @@
 #include <ctype.h>
 #include "bigbinary.h"
 
-// PHASE 1 - FONCTIONS DE BASE
-
 // Initialise un BigBinary avec une taille donnée, tous les bits sont initialisés à 0
 BigBinary initBigBinary(int taille, int signe) {
     BigBinary nb;
-    nb.Taille = taille;         // On stocke la taille
-    nb.Signe = signe;           // Pour l'instant, toujours +1 (positif)
+    nb.Taille = taille;
+    nb.Signe = signe;
     nb.Tdigits = (int *)calloc(taille, sizeof(int)); // On réserve un tableau rempli de 0
     return nb;
 }
@@ -18,24 +16,37 @@ BigBinary initBigBinary(int taille, int signe) {
 // Saisit un BigBinary avec réessai infini en cas d'erreur
 BigBinary saisirBigBinaryAvecRetry() {
     char buffer[256];
-    while (1) {  // Boucle infinie jusqu'à ce qu'une entrée valide soit fournie
+    while (1) {
         printf("> ");
         if (scanf("%255s", buffer) != 1) {
-            // Erreur de lecture
             printf("Erreur de lecture. Veuillez réessayer.");
-            // Vider le buffer d'entrée
             int c;
             while ((c = getchar()) != '\n' && c != EOF);
             continue;
         }
+        int signe = 1; // Le signe par défaut est positif
+        char* num_str = buffer; // Pointeur vers le début de la partie nombre
+
+        if (buffer[0] == '-') {
+            signe = -1;
+            num_str++; // Avancer le pointeur après le '-'
+        } else if (buffer[0] == '+') {
+            num_str++; // Avancer le pointeur après le '+'
+        }
+        BigBinary result;
+
         // Vérifier si c'est une chaîne binaire valide
-        if (estChaineBinaireValide(buffer)) {
-            return creerBigBinaryDepuisChaine(buffer);
+        if (estChaineBinaireValide(num_str)) {
+            result = creerBigBinaryDepuisChaine(num_str);
+            result.Signe = signe;
+            return result;
         }
         // Vérifier si c'est une chaîne décimale valide
-        if (estChaineDecimaleValide(buffer)) {
-            int valeur = atoi(buffer);
-            return creerBigBinaryDepuisEntier(valeur);
+        if (estChaineDecimaleValide(num_str)) {
+            int valeur_abs = atoi(num_str);
+            result = creerBigBinaryDepuisEntier(valeur_abs);
+            result.Signe = signe;
+            return result;
         }
         // Si on arrive ici, l'entrée est invalide
         printf("Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
@@ -122,7 +133,6 @@ void normaliseBigBinary(BigBinary *nb) {
         nb->Tdigits = newTab;                 // On met à jour
         nb->Taille = newSize;
     }
-
     // Cas spécial : si après normalisation on a un tableau vide, on garde au moins un 0
     if (nb->Taille == 0) {
         nb->Taille = 1;
@@ -133,6 +143,17 @@ void normaliseBigBinary(BigBinary *nb) {
 
 // Affiche un BigBinary
 void afficheBigBinary(const BigBinary nb) {
+    // 1. Vérification et affichage du signe
+    if (nb.Signe == -1) {
+        printf("-");
+    }
+    // Cas spécial pour le zéro (si Taille=0 ou Signe=0)
+    if (nb.Signe == 0 || (nb.Taille == 1 && nb.Tdigits[0] == 0)) {
+        printf("0");
+        printf("\n");
+        return;
+    }
+    // Affichage des bits (du MSB au LSB)
     for (int i = 0; i < nb.Taille; i++) {
         printf("%d", nb.Tdigits[i]);
     }
@@ -151,23 +172,23 @@ void libereBigBinary(BigBinary *nb) {
 
 // Compare si deux BigBinary sont égaux
 int egalBigBinary(const BigBinary *A, const BigBinary *B) {
-    if (A->Taille != B->Taille) return 0;     // Différentes tailles -> faux
+    if (A->Taille != B->Taille) return 0;
     for (int i = 0; i < A->Taille; i++) {
-        if (A->Tdigits[i] != B->Tdigits[i]) return 0; // Un bit différent -> faux
+        if (A->Tdigits[i] != B->Tdigits[i]) return 0;
     }
-    return 1; // Tous les bits identiques
+    return 1;
 }
 
 // Retourne 1 si A < B, sinon 0
 int inferieurBigBinary(const BigBinary *A, const BigBinary *B) {
-    if (A->Taille < B->Taille) return 1;      // Moins de bits -> forcément plus petit
-    if (A->Taille > B->Taille) return 0;      // Plus de bits -> forcément plus grand
+    if (A->Taille < B->Taille) return 1;      // Moins de bits donc forcément plus petit
+    if (A->Taille > B->Taille) return 0;      // Plus de bits donc forcément plus grand
     // Sinon, on compare bit par bit
     for (int i = 0; i < A->Taille; i++) {
         if (A->Tdigits[i] < B->Tdigits[i]) return 1;
         if (A->Tdigits[i] > B->Tdigits[i]) return 0;
     }
-    return 0; // Exactement égaux
+    return 0; // sont égaux
 }
 
 // Addition binaire A + B (A et B positifs)
@@ -176,7 +197,6 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
     int lenA = A->Taille, lenB = B->Taille;
     int maxLen = (lenA > lenB) ? lenA : lenB;
     int carry = 0; // Retenue
-
     // Résultat peut avoir un bit de plus
     BigBinary R = initBigBinary(maxLen + 1, +1);
 
@@ -191,7 +211,6 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
         carry = sum / 2;          // Retenue (0 ou 1)
         iA--; iB--; iR--;
     }
-
     normaliseBigBinary(&R);
     return R;
 }
@@ -224,7 +243,6 @@ BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
         R.Tdigits[iR] = diff;
         iA--; iB--; iR--;
     }
-
     normaliseBigBinary(&R);
     return R;
 }
@@ -243,7 +261,6 @@ unsigned long long bigBinaryVersDecimal(const BigBinary *nb) {
     }
     return resultat;
 }
-
 
 // PHASE 2 - FONCTIONS AVANCÉES
 
@@ -415,51 +432,80 @@ BigBinary pgcdBigBinary(const BigBinary *A, const BigBinary *B) {
     return resultat;
 }
 
-// Utilisation de la méthode par soustractions successives
+// Crée une copie en profondeur d'un BigBinary
+BigBinary copierBigBinary(const BigBinary *nb) {
+    BigBinary copie;
+    copie.Taille = nb->Taille;
+    copie.Signe = nb->Signe;
+    copie.Tdigits = (int *)malloc(copie.Taille * sizeof(int));
+    memcpy(copie.Tdigits, nb->Tdigits, copie.Taille * sizeof(int));
+    return copie;
+}
+
+// Utilisation de la méthode par soustraction de multiples (optimisée)
 BigBinary moduloBigBinary(const BigBinary *A, const BigBinary *B) {
     // Cas particuliers
     if (B->Taille == 1 && B->Tdigits[0] == 0) {
         printf("Erreur : division par zero\n");
         return creerBigBinaryDepuisEntier(0);
     }
-
     if (inferieurBigBinary(A, B)) {
         // Si A < B, alors A mod B = A
-        BigBinary resultat;
-        resultat.Taille = A->Taille;
-        resultat.Signe = A->Signe;
-        resultat.Tdigits = (int *)malloc(resultat.Taille * sizeof(int));
-        memcpy(resultat.Tdigits, A->Tdigits, resultat.Taille * sizeof(int));
-        return resultat;
+        return copierBigBinary(A); // Copie pour ne pas modifier l'original
     }
-
     if (egalBigBinary(A, B)) {
         // Si A = B, alors A mod B = 0
         return creerBigBinaryDepuisEntier(0);
     }
 
-    // Faire une copie de A pour travailler
-    BigBinary a;
-    a.Taille = A->Taille;
-    a.Signe = A->Signe;
-    a.Tdigits = (int *)malloc(a.Taille * sizeof(int));
-    memcpy(a.Tdigits, A->Tdigits, a.Taille * sizeof(int));
+    // --- PRÉPARATION ---
 
-    // Méthode simple : soustraire B jusqu'à ce que a < B
-    BigBinary b_copy;
-    b_copy.Taille = B->Taille;
-    b_copy.Signe = B->Signe;
-    b_copy.Tdigits = (int *)malloc(b_copy.Taille * sizeof(int));
-    memcpy(b_copy.Tdigits, B->Tdigits, b_copy.Taille * sizeof(int));
+    // Fonction d'utilité pour créer une copie d'un BigBinary (Nécessaire !)
+    // (J'ai ajouté cette fonction pour la clarté et la sécurité mémoire)
+    // BigBinary copierBigBinary(const BigBinary *nb) { ... }
+    BigBinary dividende = copierBigBinary(A);
+    BigBinary diviseur_B = copierBigBinary(B);
+    BigBinary temp_B; // Pour stocker B décalé (2^k * B)
 
-    // Tant que a >= B, soustraire B
-    while (!inferieurBigBinary(&a, &b_copy)) {
-        BigBinary temp = soustractionBigBinary(&a, &b_copy);
-        libereBigBinary(&a);
-        a = temp;
+    // --- ALGORITHME DE RÉDUCTION PAR MULTIPLES DE 2 ---
+
+    // 1. Décaler B (diviseur) jusqu'à ce qu'il ait presque la même taille que A (dividende)
+    int decalage_k = dividende.Taille - diviseur_B.Taille;
+
+    // Décalage initial
+    temp_B = copierBigBinary(&diviseur_B);
+    for (int i = 0; i < decalage_k; i++) {
+        decalageGauche(&temp_B);
     }
-    libereBigBinary(&b_copy);
-    return a;
+
+    // Si B * 2^k est plus grand que A, on enlève un décalage
+    if (inferieurBigBinary(&dividende, &temp_B)) {
+        decalageDroite(&temp_B);
+        decalage_k--;
+    }
+
+    // 2. Boucle de soustraction optimisée (de 2^k * B jusqu'à 2^0 * B)
+    for (int k = decalage_k; k >= 0; k--) {
+        // Vérifie si 2^k * B peut être soustrait de A
+        if (!inferieurBigBinary(&dividende, &temp_B)) {
+            // Soustraction : A = A - (2^k * B)
+            BigBinary resultat_temp = soustractionBigBinary(&dividende, &temp_B);
+            libereBigBinary(&dividende);
+            dividende = resultat_temp;
+        }
+
+        // On divise 2^k * B par 2 pour passer à l'itération suivante (2^(k-1) * B)
+        if (k > 0) {
+            decalageDroite(&temp_B);
+        }
+    }
+
+    // --- NETTOYAGE ET FIN ---
+    libereBigBinary(&diviseur_B);
+    libereBigBinary(&temp_B);
+
+    // 'dividende' contient maintenant le reste (A mod B)
+    return dividende;
 }
 
 // Exponentiation modulaire rapide A^e mod N
