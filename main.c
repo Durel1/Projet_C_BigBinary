@@ -13,6 +13,13 @@ int main() {
     printf("--- AFFICHAGE BINAIRE ---\n");
     printf("A = "); afficheBigBinary(A);
     printf("B = "); afficheBigBinary(B);
+    if (A.Signe == -1 || B.Signe == -1) {
+        printf("ERREUR : L'un des nombres ou les deux sont negatifs.\n");
+        printf("Les operations de la Phase 1 et 2 ne sont supportees que pour les nombres positifs.\n");
+        libereBigBinary(&A);
+        libereBigBinary(&B);
+        return 0;
+    }
 
     printf("\n--- COMPARAISONS ---\n");
     printf("A == B ? %s\n", egalBigBinary(&A, &B) ? "OUI" : "NON");

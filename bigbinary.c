@@ -24,14 +24,29 @@ BigBinary saisirBigBinaryAvecRetry() {
             while ((c = getchar()) != '\n' && c != EOF);
             continue;
         }
+        int signe = 1; // Le signe par défaut est positif
+        char* num_str = buffer; // Pointeur vers le début de la partie nombre
+
+        if (buffer[0] == '-') {
+            signe = -1;
+            num_str++; // Avancer le pointeur après le '-'
+        } else if (buffer[0] == '+') {
+            num_str++; // Avancer le pointeur après le '+'
+        }
+        BigBinary result;
+
         // Vérifier si c'est une chaîne binaire valide
-        if (estChaineBinaireValide(buffer)) {
-            return creerBigBinaryDepuisChaine(buffer);
+        if (estChaineBinaireValide(num_str)) {
+            result = creerBigBinaryDepuisChaine(num_str);
+            result.Signe = signe;
+            return result;
         }
         // Vérifier si c'est une chaîne décimale valide
-        if (estChaineDecimaleValide(buffer)) {
-            int valeur = atoi(buffer);
-            return creerBigBinaryDepuisEntier(valeur);
+        if (estChaineDecimaleValide(num_str)) {
+            int valeur_abs = atoi(num_str);
+            result = creerBigBinaryDepuisEntier(valeur_abs);
+            result.Signe = signe;
+            return result;
         }
         // Si on arrive ici, l'entrée est invalide
         printf("Entree invalide. Veuillez entrer un nombre binaire (ex: 1011) ou decimal (ex: 42) :\n");
@@ -118,7 +133,6 @@ void normaliseBigBinary(BigBinary *nb) {
         nb->Tdigits = newTab;                 // On met à jour
         nb->Taille = newSize;
     }
-
     // Cas spécial : si après normalisation on a un tableau vide, on garde au moins un 0
     if (nb->Taille == 0) {
         nb->Taille = 1;
@@ -129,6 +143,17 @@ void normaliseBigBinary(BigBinary *nb) {
 
 // Affiche un BigBinary
 void afficheBigBinary(const BigBinary nb) {
+    // 1. Vérification et affichage du signe
+    if (nb.Signe == -1) {
+        printf("-");
+    }
+    // Cas spécial pour le zéro (si Taille=0 ou Signe=0)
+    if (nb.Signe == 0 || (nb.Taille == 1 && nb.Tdigits[0] == 0)) {
+        printf("0");
+        printf("\n");
+        return;
+    }
+    // Affichage des bits (du MSB au LSB)
     for (int i = 0; i < nb.Taille; i++) {
         printf("%d", nb.Tdigits[i]);
     }
@@ -156,14 +181,14 @@ int egalBigBinary(const BigBinary *A, const BigBinary *B) {
 
 // Retourne 1 si A < B, sinon 0
 int inferieurBigBinary(const BigBinary *A, const BigBinary *B) {
-    if (A->Taille < B->Taille) return 1;      // Moins de bits -> forcément plus petit
-    if (A->Taille > B->Taille) return 0;      // Plus de bits -> forcément plus grand
+    if (A->Taille < B->Taille) return 1;      // Moins de bits donc forcément plus petit
+    if (A->Taille > B->Taille) return 0;      // Plus de bits donc forcément plus grand
     // Sinon, on compare bit par bit
     for (int i = 0; i < A->Taille; i++) {
         if (A->Tdigits[i] < B->Tdigits[i]) return 1;
         if (A->Tdigits[i] > B->Tdigits[i]) return 0;
     }
-    return 0; // Exactement égaux
+    return 0; // sont égaux
 }
 
 // Addition binaire A + B (A et B positifs)
@@ -172,7 +197,6 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
     int lenA = A->Taille, lenB = B->Taille;
     int maxLen = (lenA > lenB) ? lenA : lenB;
     int carry = 0; // Retenue
-
     // Résultat peut avoir un bit de plus
     BigBinary R = initBigBinary(maxLen + 1, +1);
 
@@ -187,7 +211,6 @@ BigBinary additionBigBinary(const BigBinary *A, const BigBinary *B) {
         carry = sum / 2;          // Retenue (0 ou 1)
         iA--; iB--; iR--;
     }
-
     normaliseBigBinary(&R);
     return R;
 }
@@ -220,7 +243,6 @@ BigBinary soustractionBigBinary(const BigBinary *A, const BigBinary *B) {
         R.Tdigits[iR] = diff;
         iA--; iB--; iR--;
     }
-
     normaliseBigBinary(&R);
     return R;
 }
@@ -239,7 +261,6 @@ unsigned long long bigBinaryVersDecimal(const BigBinary *nb) {
     }
     return resultat;
 }
-
 
 // PHASE 2 - FONCTIONS AVANCÉES
 
