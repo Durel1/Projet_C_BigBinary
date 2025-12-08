@@ -49,11 +49,11 @@ Utiliser la bibliothèque pour un mini-chiffrement RSA pédagogique (pas sécuri
     - `additionBigBinary`
     - `soustractionBigBinary` (si `A ≥ B`)
 
-### **Phase 2 (en cours)**
+### **Phase 2 **
 **Objectif :** ajouter les opérations arithmétiques avancées.
 
 **Fonctionnalités prévues :**
-- Multiplication (`multiplicationBigBinary`) ✅ *en cours d’implémentation*
+- Multiplication (`multiplicationBigBinary`) 
 - Division (`divisionBigBinary`)
 - Modulo (`moduloBigBinary`)
 - Algorithme du PGCD (version binaire)

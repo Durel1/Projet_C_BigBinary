@@ -39,6 +39,7 @@ BigBinary saisirBigBinaryAvecRetry() {
         if (estChaineBinaireValide(num_str)) {
             result = creerBigBinaryDepuisChaine(num_str);
             result.Signe = signe;
+            //printf("DEBUG: Conversion reussie. Taille = %d, Signe = %d\n", result.Taille, result.Signe);
             return result;
         }
         // Vérifier si c'est une chaîne décimale valide
@@ -46,6 +47,7 @@ BigBinary saisirBigBinaryAvecRetry() {
             int valeur_abs = atoi(num_str);
             result = creerBigBinaryDepuisEntier(valeur_abs);
             result.Signe = signe;
+            //printf("DEBUG: Conversion reussie. Taille = %d, Signe = %d\n", result.Taille, result.Signe);
             return result;
         }
         // Si on arrive ici, l'entrée est invalide
@@ -143,7 +145,7 @@ void normaliseBigBinary(BigBinary *nb) {
 
 // Affiche un BigBinary
 void afficheBigBinary(const BigBinary nb) {
-    // 1. Vérification et affichage du signe
+    // Vérification et affichage du signe
     if (nb.Signe == -1) {
         printf("-");
     }
@@ -261,6 +263,7 @@ unsigned long long bigBinaryVersDecimal(const BigBinary *nb) {
     }
     return resultat;
 }
+
 
 // PHASE 2 - FONCTIONS AVANCÉES
 

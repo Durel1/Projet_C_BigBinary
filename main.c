@@ -3,8 +3,10 @@
 #include "bigbinary.c"
 
 int main() {
+    char continuer = 'o';
     printf("=== BIBLIOTHEQUE BIG BINARY === \n\n");
-    printf("Entrez le premier nombre (A) :\n");
+    do {
+        printf("Entrez le premier nombre (A) :\n");
     BigBinary A = saisirBigBinaryAvecRetry();
     printf("Entrez le second nombre (B) :\n");
     BigBinary B = saisirBigBinaryAvecRetry();
@@ -18,7 +20,9 @@ int main() {
         printf("Les operations de la Phase 1 et 2 ne sont supportees que pour les nombres positifs.\n");
         libereBigBinary(&A);
         libereBigBinary(&B);
-        return 0;
+        printf("\nvoulez-vous entrer d'autres nombres (o/n) ? :");
+        scanf(" %c", &continuer);
+        continue;
     }
 
     printf("\n--- COMPARAISONS ---\n");
@@ -28,7 +32,7 @@ int main() {
     printf("\n");
 
     printf("--- OPERATIONS ARITHMETIQUES ---\n");
-    // Addition (toujours possible avec des nombres positifs)
+    // Addition
     BigBinary S = additionBigBinary(&A, &B);
     printf("A + B = "); afficheBigBinary(S);
     libereBigBinary(&S);
@@ -45,6 +49,7 @@ int main() {
     }
 
     printf("\n=== PHASE 2 - OPERATIONS AVANCEES ===\n");
+
     printf("\n--- Multiplication Egyptienne ---\n");
     BigBinary M = multiplicationEgyptienne(&A, &B);
     printf("A * B = "); afficheBigBinary(M);
@@ -87,6 +92,13 @@ int main() {
     // Libération mémoire finale
     libereBigBinary(&A);
     libereBigBinary(&B);
+    printf("\nvoulez-vous entrer d'autres nombres (o/n) ? :");
+    scanf(" %c", &continuer);
 
+    } while (continuer == 'o' || continuer == 'O' || continuer == 'oui');
+
+    printf("\nfin du programme. Au revoir !\n");
     return 0;
+
+
 }
