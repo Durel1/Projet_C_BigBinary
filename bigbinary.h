@@ -62,4 +62,17 @@ BigBinary expModBigBinary(const BigBinary *A, unsigned int e, const BigBinary *N
 // Fonction pour convertir BigBinary en entier décimal
 unsigned long long bigBinaryVersDecimal(const BigBinary *nb);
 
+// Exponentiation modulaire rapide (exposant = unsigned int)
+BigBinary expModBigBinary(const BigBinary *A, unsigned int e, const BigBinary *N);
+
+// Fonction pour convertir BigBinary en entier décimal
+unsigned long long bigBinaryVersDecimal(const BigBinary *nb);
+
+// === PHASE 3 (BONUS) - Fonctions RSA simplifiées ===
+// Chiffrement RSA: C = M^E mod N
+BigBinary BigBinary_RSA_encrypt(const BigBinary *M, unsigned int E, const BigBinary *N);
+
+// Déchiffrement RSA: M = C^D mod N
+BigBinary BigBinary_RSA_decrypt(const BigBinary *C, unsigned int D, const BigBinary *N);
+
 #endif

@@ -547,3 +547,25 @@ BigBinary expModBigBinary(const BigBinary *A, unsigned int e, const BigBinary *N
     libereBigBinary(&base);
     return resultat;
 }
+
+// === PHASE 3 (BONUS) - Fonctions RSA simplifiées ===
+
+// Chiffrement RSA: C = M^E mod N
+// M: Message (BigBinary)
+// E: Exposant public (unsigned int)
+// N: Module RSA (BigBinary)
+// Retourne C, le message chiffré
+BigBinary BigBinary_RSA_encrypt(const BigBinary *M, unsigned int E, const BigBinary *N) {
+    // La fonction expModBigBinary fait tout le travail : M^E mod N
+    return expModBigBinary(M, E, N);
+}
+
+// Déchiffrement RSA: M = C^D mod N
+// C: Message chiffré (BigBinary)
+// D: Exposant privé (unsigned int)
+// N: Module RSA (BigBinary)
+// Retourne M, le message déchiffré
+BigBinary BigBinary_RSA_decrypt(const BigBinary *C, unsigned int D, const BigBinary *N) {
+    // La fonction expModBigBinary fait tout le travail : C^D mod N
+    return expModBigBinary(C, D, N);
+}
