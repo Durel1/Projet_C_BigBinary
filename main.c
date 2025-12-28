@@ -4,16 +4,16 @@
 
 int main() {
     char continuer = 'o';
-    printf("=== BIBLIOTHEQUE BIG BINARY === \n\n");
+    printf(" BIBLIOTHEQUE BIG BINARY  \n\n");
     do {
         printf("Entrez le premier nombre (A) :\n");
         BigBinary A = saisirBigBinaryAvecRetry();
         printf("Entrez le second nombre (B) :\n");
         BigBinary B = saisirBigBinaryAvecRetry();
 
-        printf("=== PHASE 1 - FUNCTIONS DE BASE ===\n\n");
+        printf(" PHASE 1 - FUNCTIONS DE BASE \n\n");
 
-        printf("--- AFFICHAGE BINAIRE ---\n");
+        printf(" AFFICHAGE BINAIRE \n");
         printf("A = "); afficheBigBinary(A);
         printf("B = "); afficheBigBinary(B);
         if (A.Signe == -1 || B.Signe == -1) {
@@ -26,13 +26,13 @@ int main() {
             continue;
         }
 
-        printf("\n--- COMPARAISONS ---\n");
+        printf("\n COMPARAISONS \n");
         printf("A == B ? %s\n", egalBigBinary(&A, &B) ? "OUI" : "NON");
         printf("A < B ?  %s\n", inferieurBigBinary(&A, &B) ? "OUI" : "NON");
         printf("B < A ?  %s\n", inferieurBigBinary(&B, &A) ? "OUI" : "NON");
         printf("\n");
 
-        printf("--- OPERATIONS ARITHMETIQUES ---\n");
+        printf(" OPERATIONS ARITHMETIQUES \n");
         // Addition
         BigBinary S = additionBigBinary(&A, &B);
         printf("A + B = "); afficheBigBinary(S);
@@ -49,19 +49,19 @@ int main() {
             libereBigBinary(&D);
         }
 
-        printf("\n=== PHASE 2 - OPERATIONS AVANCEES ===\n");
+        printf("\n PHASE 2 - OPERATIONS AVANCEES \n");
 
-        printf("\n--- Multiplication Egyptienne ---\n");
+        printf("\n Multiplication Egyptienne \n");
         BigBinary M = multiplicationEgyptienne(&A, &B);
         printf("A * B = "); afficheBigBinary(M);
         libereBigBinary(&M);
 
-        printf("\n--- PGCD Binaire ---\n");
+        printf("\n PGCD Binaire \n");
         BigBinary PGCD = pgcdBigBinary(&A, &B);
         printf("PGCD(A, B) = "); afficheBigBinary(PGCD);
         libereBigBinary(&PGCD);
 
-        printf("\n--- Modulo sans division ---\n");
+        printf("\n Modulo sans division \n");
         if (inferieurBigBinary(&B, &A) || egalBigBinary(&A, &B)) {
             BigBinary MOD = moduloBigBinary(&A, &B);
             printf("A mod B = "); afficheBigBinary(MOD);
@@ -70,7 +70,7 @@ int main() {
             printf("A mod B : A < B, donc A mod B = A\n");
         }
 
-        printf("\n--- Exponentiation Modulaire ---\n");
+        printf("\n Exponentiation Modulaire \n");
         printf("Entrez un exposant e (entier decimal) : \n");
         printf(">");
         unsigned int e;
@@ -90,13 +90,13 @@ int main() {
             printf("A doit etre inferieur a N pour l'exponentiation modulaire\n");
         }
 
-        // =========================================================
-        // === PHASE 3 (BONUS) - RSA SIMPLIFIE ===
-        // =========================================================
-        printf("\n=== PHASE 3 (BONUS) - RSA SIMPLIFIE ===\n");
+        //
+        //  PHASE 3 (BONUS) - RSA SIMPLIFIE
+        //
+        printf("\n PHASE 3 (BONUS) - RSA SIMPLIFIE \n");
 
         // Définir les clés pour le test RSA (Exemple : N=1211809, E=101, D=251501)
-        printf("\n--- Test Chiffrement/Dechiffrement RSA ---\n");
+        printf("\n Test Chiffrement/Dechiffrement RSA \n");
         printf("Entrez le message M a chiffrer (ex: 99999) :\n");
         BigBinary M_orig = saisirBigBinaryAvecRetry();
 
